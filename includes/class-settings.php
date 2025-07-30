@@ -20,21 +20,40 @@ class Custom_Login_Register_Settings {
     }
 
     public function register_settings() {
-        register_setting( 'custom_login_register_settings', 'clr_melipayamak_api_key', [ 'sanitize_callback' => 'sanitize_text_field' ] );
-        add_settings_section( 'clr_melipayamak_section', 'تنظیمات ملی‌پیامک', null, 'custom-login-register-settings' );
+        register_setting('custom_login_register_settings', 'clr_melipayamak_api_key', ['sanitize_callback' => 'sanitize_text_field']);
+        register_setting('custom_login_register_settings', 'clr_melipayamak_sender_number', ['sanitize_callback' => 'sanitize_text_field']);
+
+        add_settings_section('clr_melipayamak_section', 'تنظیمات ملی‌پیامک', null, 'custom-login-register-settings');
+
         add_settings_field(
             'clr_melipayamak_api_key',
             'کلید API ملی‌پیامک',
-            [ $this, 'render_api_key_field' ],
+            [$this, 'render_api_key_field'],
+            'custom-login-register-settings',
+            'clr_melipayamak_section'
+        );
+
+        add_settings_field(
+            'clr_melipayamak_sender_number',
+            'شماره خط ارسال‌کننده',
+            [$this, 'render_sender_number_field'],
             'custom-login-register-settings',
             'clr_melipayamak_section'
         );
     }
 
     public function render_api_key_field() {
-        $api_key = get_option( 'clr_melipayamak_api_key', '' );
+        $api_key = get_option('clr_melipayamak_api_key', '');
         ?>
-        <input type="text" name="clr_melipayamak_api_key" value="<?php echo esc_attr( $api_key ); ?>" size="50">
+        <input type="text" name="clr_melipayamak_api_key" value="<?php echo esc_attr($api_key); ?>" size="50">
+        <?php
+    }
+
+    public function render_sender_number_field() {
+        $sender_number = get_option('clr_melipayamak_sender_number', '');
+        ?>
+        <input type="text" name="clr_melipayamak_sender_number" value="<?php echo esc_attr($sender_number); ?>" size="50">
+        <p class="description">شماره خطی که با آن پیامک ارسال می‌شود.</p>
         <?php
     }
 

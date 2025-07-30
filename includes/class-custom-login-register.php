@@ -14,8 +14,7 @@ class Custom_Login_Register {
     }
 
     public function render_register_form() {
-
-        if ( is_user_logged_in() ) {
+        if (is_user_logged_in()) {
             return '<p>شما قبلاً وارد شده‌اید!</p>';
         }
 
@@ -57,10 +56,11 @@ class Custom_Login_Register {
                         <label for="otp_code">کد تأیید:</label>
                         <input type="text" id="otp_code" name="otp_code" required>
                         <input type="hidden" id="otp_mobile" name="otp_mobile">
+                        <input type="hidden" id="otp_user_id" name="otp_user_id">
                     </p>
                     <p>
                         <input type="submit" value="تأیید کد">
-                        <button type="button" id="resend-otp" disabled>ارسال مجدد <span id="resend-timer"></span></button>
+                        <button type="button" id="resend-otp" data-mobile="" data-user-id="" disabled>ارسال مجدد <span id="resend-timer"></span></button>
                     </p>
                 </form>
             </div>
@@ -70,7 +70,7 @@ class Custom_Login_Register {
     }
 
     public function render_login_form() {
-        if ( is_user_logged_in() ) {
+        if (is_user_logged_in()) {
             return '<p>شما قبلاً وارد شده‌اید!</p>';
         }
 
@@ -93,25 +93,30 @@ class Custom_Login_Register {
                     <a href="#" id="forgot-password-link">فراموشی رمز عبور؟</a>
                 </p>
             </form>
-            <div id="forgot-password-form" style="display:none;">
-                <h2>بازنشانی رمز عبور</h2>
-                <div id="forgot-password-message"></div>
-                <form method="post" id="custom-forgot-password-form">
+
+            <div id="otp-form-login" style="display:none;">
+                <h2>تأیید کد OTP</h2>
+                <div id="otp-message-login"></div>
+                <form method="post" id="custom-verify-otp-login-form">
                     <p>
-                        <label for="forgot_credential">ایمیل یا شماره موبایل:</label>
-                        <input type="text" id="forgot_credential" name="forgot_credential" required>
+                        <label for="otp_code_login">کد تأیید:</label>
+                        <input type="text" id="otp_code_login" name="otp_code_login" required>
+                        <input type="hidden" id="otp_mobile_login" name="otp_mobile_login">
+                        <input type="hidden" id="otp_user_id_login" name="otp_user_id_login">
                     </p>
                     <p>
-                        <input type="submit" value="ارسال لینک بازنشانی">
+                        <input type="submit" value="تأیید کد">
+                        <button type="button" id="resend-otp-login" data-mobile="" data-user-id="" disabled>ارسال مجدد <span id="resend-timer-login"></span></button>
                     </p>
                 </form>
             </div>
+
             <div id="forgot-password-form" style="display:none;">
                 <h2>بازنشانی رمز عبور</h2>
                 <div id="forgot-password-message"></div>
                 <form method="post" id="custom-forgot-password-form">
                     <p>
-                        <label for="forgot_credential"> شماره موبایل:</label>
+                        <label for="forgot_credential">شماره موبایل:</label>
                         <input type="text" id="forgot_credential" name="forgot_credential" required>
                     </p>
                     <p>
@@ -130,7 +135,7 @@ class Custom_Login_Register {
                         </p>
                         <p>
                             <input type="submit" value="تأیید کد">
-                            <button type="button" id="resend-otp-forgot" disabled>ارسال مجدد <span id="resend-timer-forgot"></span></button>
+                            <button type="button" id="resend-otp-forgot" data-mobile="" data-user-id="" disabled>ارسال مجدد <span id="resend-timer-forgot"></span></button>
                         </p>
                     </form>
                 </div>

@@ -4,9 +4,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Custom_Login_Register_OTP_Handler {
-    public function __construct() {
-        register_activation_hook( __FILE__, [ $this, 'create_otp_table' ] );
-    }
 
     public function create_otp_table() {
         global $wpdb;
@@ -44,17 +41,14 @@ class Custom_Login_Register_OTP_Handler {
         $lockout_duration = HOUR_IN_SECONDS;
         $wait_times = [MINUTE_IN_SECONDS, 2 * MINUTE_IN_SECONDS, 5 * MINUTE_IN_SECONDS];
 
-        if ($row) {
-            if ($row->attempt_count >= $max_attempts) {
-                $last_attempt_time = strtotime($row->last_attempt_at);
-                if ((time() - $last_attempt_time) < $lockout_duration) {
-                    wp_send_json_error('تعداد تلاش‌ها به حداکثر رسیده است. لطفاً یک ساعت دیگر امتحان کنید.');
-                } else {
-                    // Reset attempt count after lockout period
-                    $wpdb->delete($table_name, ['mobile' => $mobile], ['%s']);
-                    $row = null;
+        if ( $row ) {
+            if ( $row->attempt_count >= $max_attempts ) {
+                $last_attempt_time = strtotime( $row->last_attempt_at );
+                if ( ( time() - $last_attempt_time ) < $lockout_duration ) {
+                    wp_send_json_error( 'تعداد تلاش‌ها به حداکثر رسیده است. لطفاً یک ساعت دیگر امتحان کنید.' );
                 }
             }
+            $wpdb->delete( $table_name, [ 'mobile' => $mobile ], [ '%s' ] );
         }
 
         $otp_code = sprintf('%06d', mt_rand(100000, 999999));
@@ -93,7 +87,6 @@ class Custom_Login_Register_OTP_Handler {
                 "SELECT * FROM $table_name WHERE mobile = %s AND otp_code = %s AND user_id = %d AND expires_at > %s",
                 $mobile,
                 $otp_code,
-                $user_id,
                 current_time('mysql')
             )
         );
@@ -102,7 +95,7 @@ class Custom_Login_Register_OTP_Handler {
             $user = get_user_by('ID', $row->user_id);
             if ($user) {
                 update_user_meta($user->ID, 'is_verified', true);
-                $wpdb->delete($table_name, ['id' => $row->id], ['%d']);
+                $wpdb->delete( $table_name, [ 'mobile' => $mobile ], [ '%s' ] );
                 return $user;
             }
         }

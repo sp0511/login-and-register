@@ -224,7 +224,6 @@ jQuery(document).ready(function($) {
 
     $('#resend-otp, #resend-otp-login, #resend-otp-forgot').on('click', function() {
         const button = $(this);
-        const timerElement = button.find('span');
         $.ajax({
             type: 'POST',
             url: pluginValues.ajax_url,
@@ -234,18 +233,16 @@ jQuery(document).ready(function($) {
                 mobile: button.data('mobile'),
                 user_id: button.data('user-id')
             },
-            success: function(response) {
-                const messageElement = button.closest('form').prev('.success, .error');
-                if (response.success) {
-                    messageElement.html('<p class="success">' + response.data.message + '</p>');
-                    startTimer(response.data.wait_time, timerElement, button);
+            success: function(data) {
+                if (data.success) {
+                    $('#otp-message, #otp-message-forgot, #login-message').html('<p class="success">' + data.data.message + '</p>');
+                    startTimer(data.data.wait_time, button.closest('form').find('[id^=resend-timer]'));
                 } else {
-                    messageElement.html('<p class="error">' + response.data + '</p>');
+                    $('#otp-message, #otp-message-forgot, #login-message').html('<p class="error">' + data.data + '</p>');
                 }
             },
             error: function() {
-                const messageElement = button.closest('form').prev('.success, .error');
-                messageElement.html('<p class="error">خطایی رخ داد. لطفاً دوباره تلاش کنید.</p>');
+                $('#otp-message, #otp-message-forgot, #login-message').html('<p class="error">خطایی رخ داد. لطفاً دوباره تلاش کنید.</p>');
             }
         });
     });

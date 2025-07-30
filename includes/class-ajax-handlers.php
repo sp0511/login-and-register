@@ -82,43 +82,24 @@ class Custom_Login_Register_Ajax_Handlers {
         $otp_handler = new Custom_Login_Register_OTP_Handler();
         $otp_data = $otp_handler->generate_otp($user_id, $mobile);
 
-        $api_key = get_option('clr_melipayamak_api_key', '');
-        $sender_number = get_option('clr_melipayamak_sender_number', '');
-
-        if (empty($api_key) || empty($sender_number)) {
-            wp_send_json_error('کلید API یا شماره خط ملی‌پیامک تنظیم نشده است.');
+        $response_body = send_sms($mobile, $otp_data['otp_code']);
+        if (
+            isset($response_body['success'], $response_body['result']['success'], $response_body['result']['status_code']) &&
+            $response_body['success'] === true &&
+            $response_body['result']['success'] === true &&
+            (int)$response_body['result']['status_code'] === 200
+        ) {
+            wp_send_json_success([
+                'message' => 'ثبت‌نام انجام شد! کد تأیید به شماره موبایل شما ارسال شد.',
+                'mobile' => $mobile,
+                'user_id' => $user_id,
+                'wait_time' => $otp_data['wait_time'],
+            ]);
+        }else{
+            wp_send_json_error('خطا در ارسال کد یکبار مصرف');
         }
 
-        $api_url = 'https://api.melipayamak.com/api/send/simple';
-        $data = [
-            'api_key' => $api_key,
-            'to' => $mobile,
-            'from' => $sender_number,
-            'text' => "کد تأیید شما: {$otp_data['otp_code']}",
-        ];
 
-        $response = wp_remote_post($api_url, [
-            'body' => json_encode($data),
-            'headers' => ['Content-Type' => 'application/json'],
-        ]);
-
-        if (is_wp_error($response)) {
-            wp_send_json_error('خطا در ارسال پیامک: ' . $response->get_error_message());
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        $result = json_decode($body, true);
-
-        if (!isset($result['status']) || $result['status'] !== 'success') {
-            wp_send_json_error('خطا در ارسال پیامک: ' . ($result['message'] ?? 'پاسخ نامعتبر از ملی‌پیامک'));
-        }
-
-        wp_send_json_success([
-            'message' => 'ثبت‌نام انجام شد! کد تأیید به شماره موبایل شما ارسال شد.',
-            'mobile' => $mobile,
-            'user_id' => $user_id,
-            'wait_time' => $otp_data['wait_time'],
-        ]);
     }
 
     public function ajax_verify_otp() {
@@ -181,41 +162,20 @@ class Custom_Login_Register_Ajax_Handlers {
         $otp_handler = new Custom_Login_Register_OTP_Handler();
         $otp_data = $otp_handler->generate_otp($user_id, $mobile);
 
-        // Resend the OTP via SMS
-        $api_key = get_option('clr_melipayamak_api_key', '');
-        $sender_number = get_option('clr_melipayamak_sender_number', '');
-        if (empty($api_key) || empty($sender_number)) {
-            wp_send_json_error('کلید API یا شماره خط ملی‌پیامک تنظیم نشده است.');
+        $response_body = send_sms($mobile, $otp_data['otp_code']);
+        if (
+            isset($response_body['success'], $response_body['result']['success'], $response_body['result']['status_code']) &&
+            $response_body['success'] === true &&
+            $response_body['result']['success'] === true &&
+            (int)$response_body['result']['status_code'] === 200
+        ) {
+            wp_send_json_success([
+                'message' => 'کد تأیید جدید به شماره موبایل شما ارسال شد.',
+                'wait_time' => $otp_data['wait_time'],
+            ]);
+        }else{
+            wp_send_json_error('خطا در ارسال کد یکبار مصرف');
         }
-
-        $api_url = 'https://api.melipayamak.com/api/send/simple';
-        $data = [
-            'api_key' => $api_key,
-            'to' => $mobile,
-            'from' => $sender_number,
-            'text' => "کد تأیید شما: {$otp_data['otp_code']}",
-        ];
-
-        $response = wp_remote_post($api_url, [
-            'body' => json_encode($data),
-            'headers' => ['Content-Type' => 'application/json'],
-        ]);
-
-        if (is_wp_error($response)) {
-            wp_send_json_error('خطا در ارسال پیامک: ' . $response->get_error_message());
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        $result = json_decode($body, true);
-
-        if (!isset($result['status']) || $result['status'] !== 'success') {
-            wp_send_json_error('خطا در ارسال پیامک: ' . ($result['message'] ?? 'پاسخ نامعتبر از ملی‌پیامک'));
-        }
-
-        wp_send_json_success([
-            'message' => 'کد تأیید جدید به شماره موبایل شما ارسال شد.',
-            'wait_time' => $otp_data['wait_time'],
-        ]);
     }
 
     public function ajax_login() {
